@@ -21,30 +21,35 @@ treated_file = 'path/to/treated_file.bw'  # Replace with the path to your treate
 chrom = 'chr1'
 start = 0
 end = 10000
+```
+
 If your files are in the same directory as the script, you can directly specify their names like this:
 
-python
-Copy code
+```python
 control_file = 'GSM8608549_spleen_WT_LCMV_Qiazol_50069.bw'
 treated_file = 'GSM8608550_spleen_WT_LCMV_Qiazol_50070.bw'
-Step 3: Install Dependencies
+```
+
+### Step 3: Install Dependencies
 Before running the project, make sure you have Python installed along with the required libraries. You can install the dependencies by running:
 
-bash
-Copy code
+```bash
 pip install -r requirements.txt
-Step 4: Run the Code
+```
+
+### Step 4: Run the Code
 After setting the correct file paths and installing the dependencies, run the script:
 
-bash
-Copy code
+```bash
 python rna_seq_analysis.py
-Step 5: View Results
+```
+
+### Step 5: View Results
 The results will include a list of differentially expressed genes based on a T-test. A Volcano plot will also be displayed to visualize the significance of gene expression changes.
 
-Example Python Script (rna_seq_analysis.py):
-python
-Copy code
+## Example Python Script (`rna_seq_analysis.py`):
+
+```python
 import pyBigWig
 import numpy as np
 import pandas as pd
@@ -98,18 +103,21 @@ plt.title('Volcano Plot')
 plt.xlabel('Log2 Fold Change')
 plt.ylabel('-Log10 Adjusted P-value')
 plt.show()
-Requirements
+```
+
+### Requirements:
 You need the following Python libraries:
 
-pyBigWig
-pandas
-numpy
-matplotlib
-seaborn
-scipy
-biopython
+- pyBigWig
+- pandas
+- numpy
+- matplotlib
+- seaborn
+- scipy
+- biopython
+
 Install them using the following command:
 
-bash
-Copy code
+```bash
 pip install -r requirements.txt
+```
