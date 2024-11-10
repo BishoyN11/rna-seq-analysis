@@ -1,49 +1,45 @@
-import pandas as pd
+import pyBigWig
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.stats import ttest_ind
 
-# Reading gene count data from a CSV file
-count_data = pd.read_csv('counts.csv', index_col=0)
+# Define function to read bigWig data
+def read_bigwig(file_path, chrom, start, end):
+    bw = pyBigWig.open(file_path)
+    data = bw.values(chrom, start, end)
+    bw.close()
+    return np.nan_to_num(data)  # Convert NaNs to zeros or other default value
 
-# Descriptive data (e.g., condition: control and treated)
-# Ensure that the order of the samples in the metadata matches the order of the columns in the gene count data
-col_data = ['control', 'treated'] * (count_data.shape[1] // 2)
+# Example: Reading data from bigWig files (modify these paths and region accordingly)
+control_file = 'GSM8608549_spleen_WT_LCMV_Qiazol_50069.bw'
+treated_file = 'GSM8608549_spleen_WT_LCMV_Qiazol_50069.bw'  # Replace with treated file
 
-# Splitting the data into groups based on the condition
-control_data = count_data.iloc[:, :len(col_data)//2]
-treated_data = count_data.iloc[:, len(col_data)//2:]
+# Specify the genomic region (example: chromosome 1, position 0-10000)
+chrom = 'chr1'
+start = 0
+end = 10000
 
-# Performing a T-test to check for differences between the groups
-p_values = []
-log2_fold_changes = []
+# Read data from bigWig files for control and treated samples
+control_data = read_bigwig(control_file, chrom, start, end)
+treated_data = read_bigwig(treated_file, chrom, start, end)
 
-for gene in count_data.index:
-    control_counts = control_data.loc[gene].values
-    treated_counts = treated_data.loc[gene].values
-    # Perform the T-test
-    t_stat, p_val = ttest_ind(control_counts, treated_counts)
-    p_values.append(p_val)
-    
-    # Calculate the relative change (log2 fold change)
-    log2_fc = np.log2(np.mean(treated_counts) / np.mean(control_counts))
-    log2_fold_changes.append(log2_fc)
+# Perform T-test between control and treated data
+t_stat, p_value = ttest_ind(control_data, treated_data)
 
-# Create a DataFrame for the results
+# Create a DataFrame for the results (for demonstration)
 results = pd.DataFrame({
-    'Gene': count_data.index,
-    'log2FoldChange': log2_fold_changes,
-    'pValue': p_values
+    'Gene': [f'{chrom}:{start}-{end}'],
+    'log2FoldChange': [np.log2(np.mean(treated_data) / np.mean(control_data))],
+    'pValue': [p_value]
 })
 
-# Adjust the results to obtain the adjusted p-values (FDR) using the Benjamini-Hochberg method
+# Adjust p-values (FDR)
 results['padj'] = results['pValue'] * len(results) / (np.argsort(results['pValue']) + 1)
 
-# Extract significantly differentially expressed genes (padj < 0.05)
-significant_genes = results[results['padj'] < 0.05]
-
 # Print the significantly differentially expressed genes
+significant_genes = results[results['padj'] < 0.05]
 print(significant_genes)
 
 # Plot the Volcano plot
